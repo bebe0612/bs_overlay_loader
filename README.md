@@ -1,14 +1,25 @@
 # bs_overlay_loader
 
-A new Flutter package project.
+Nice and Simple overlay progress loader.
+It suits both material, cupertino design.
 
 ## Getting Started
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+You just call the code below when you want to show overlay loading screen.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+```Dart
+BsOverlayLoader.show(context, text: 'Uploading');
+```
+Call update() When you want to update progress value.
+
+```Dart
+BsOverlayLoader.update(progress);
+```
+
+Call hide() When you want to hide overlay loading screen.
+
+```Dart
+BsOverlayLoader.hide();
+```
+
+Very easy right?
