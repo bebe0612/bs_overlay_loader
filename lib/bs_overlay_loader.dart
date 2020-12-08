@@ -90,18 +90,16 @@ class _BsOverlayLoaderState extends State<BsOverlayLoader> {
   }
 
   void updateProgress(double progress) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          if (progress < 0) {
-            _progress = 0;
-          } else if (progress > 1) {
-            _progress = 1;
-          }
-          _progress = progress;
-        });
-      }
-    });
+    if (mounted) {
+      setState(() {
+        if (progress < 0) {
+          _progress = 0;
+        } else if (progress > 1) {
+          _progress = 1;
+        }
+        _progress = progress;
+      });
+    }
   }
 
   @override
@@ -137,19 +135,15 @@ class BsCircleProgressBar extends StatefulWidget {
 class _BsCircleProgressBarState extends State<BsCircleProgressBar>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  Animation<double> curve;
   @override
   void initState() {
     super.initState();
 
     this._controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    this.curve = CurvedAnimation(
-      parent: this._controller,
-      curve: Curves.ease,
-    );
+
     this._controller.forward();
     this.valueTween = Tween<double>(
       begin: 0,
@@ -167,11 +161,9 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
   @override
   void didUpdateWidget(BsCircleProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (this.widget.value != oldWidget.value) {
       double beginValue =
           this.valueTween?.evaluate(this._controller) ?? oldWidget?.value ?? 0;
-
       this.valueTween = Tween<double>(
         begin: beginValue,
         end: this.widget.value ?? 1,
@@ -188,15 +180,15 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
     final backgroundColor = this.widget.backgroundColor;
     final foregroundColor = this.widget.foregroundColor;
     return Container(
-      width: 300,
-      height: 100,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
       child: Material(
         color: Colors.transparent,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedBuilder(
-              animation: this.curve,
+              animation: this._controller,
               child: Container(),
               builder: (context, child) {
                 return Container(
@@ -207,7 +199,7 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
                     foregroundPainter: CircleProgressBarPainter(
                       backgroundColor: backgroundColor,
                       foregroundColor: foregroundColor,
-                      percentage: this.valueTween.evaluate(this.curve),
+                      percentage: this.valueTween.evaluate(this._controller),
                     ),
                   ),
                 );
@@ -254,11 +246,9 @@ class CircleProgressBarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final radius = (shortestSide / 2);
 
-    // Start at the top. 0 radians represents the right edge
     final double startAngle = -(2 * pi * 0.25);
     final double sweepAngle = (2 * pi * (this.percentage ?? 0));
 
-    // Don't draw the background if we don't have a background color
     if (this.backgroundColor != null) {
       final backgroundPaint = Paint()
         ..color = this.backgroundColor
