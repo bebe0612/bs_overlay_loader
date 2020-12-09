@@ -49,11 +49,9 @@ class BsOverlayLoader extends StatefulWidget {
       _currentLoader = new OverlayEntry(
           builder: (context) => Stack(
                 children: <Widget>[
-                  // overlay background color
                   Container(
                     color: overlayColor ?? Color(0xccffffff),
                   ),
-                  // loader widget positioned at center
                   Center(
                       child: BsOverlayLoader._(
                     _loaderController,
@@ -107,7 +105,7 @@ class _BsOverlayLoaderState extends State<BsOverlayLoader> {
     return Center(
       child: BsCircleProgressBar(
         backgroundColor: Colors.grey[400],
-        foregroundColor: Colors.grey[700],
+        foregroundColor: Colors.blueGrey[400],
         value: _progress,
         text: widget.text,
       ),
@@ -135,6 +133,8 @@ class BsCircleProgressBar extends StatefulWidget {
 class _BsCircleProgressBarState extends State<BsCircleProgressBar>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
+
+  Animation<double> _curve;
   @override
   void initState() {
     super.initState();
@@ -143,7 +143,10 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
+    _curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.bounceInOut,
+    );
     this._controller.forward();
     this.valueTween = Tween<double>(
       begin: 0,
@@ -179,6 +182,7 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
   Widget build(BuildContext context) {
     final backgroundColor = this.widget.backgroundColor;
     final foregroundColor = this.widget.foregroundColor;
+
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -191,19 +195,36 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
               animation: this._controller,
               child: Container(),
               builder: (context, child) {
-                return Container(
-                  width: 60,
-                  height: 60,
-                  child: CustomPaint(
-                    child: child,
-                    foregroundPainter: CircleProgressBarPainter(
-                      backgroundColor: backgroundColor,
-                      foregroundColor: foregroundColor,
-                      percentage: this.valueTween.evaluate(this._controller),
+                double percentage = this.valueTween.evaluate(_curve);
+                return Stack(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      child: CustomPaint(
+                        child: child,
+                        foregroundPainter: CircleProgressBarPainter(
+                          backgroundColor: backgroundColor,
+                          foregroundColor: foregroundColor,
+                          percentage: percentage,
+                        ),
+                      ),
                     ),
-                  ),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      child: Center(
+                        child: Text(
+                          (percentage * 100).toStringAsFixed(0) + '%',
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               },
+            ),
+            SizedBox(
+              height: 5,
             ),
             Text(
               widget.text,
@@ -231,7 +252,7 @@ class CircleProgressBarPainter extends CustomPainter {
     @required this.foregroundColor,
     @required this.percentage,
     double strokeWidth,
-  }) : this.strokeWidth = strokeWidth ?? 6;
+  }) : this.strokeWidth = strokeWidth ?? 8;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -242,7 +263,6 @@ class CircleProgressBarPainter extends CustomPainter {
     final foregroundPaint = Paint()
       ..color = this.foregroundColor
       ..strokeWidth = this.strokeWidth
-      ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     final radius = (shortestSide / 2);
 

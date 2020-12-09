@@ -45,17 +45,19 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             RaisedButton(
               onPressed: () {
-                Timer.periodic(Duration(milliseconds: 300), (_) {
-                  progress += 0.05;
+                Timer.periodic(Duration(seconds: 1), (_) {
+                  progress += 0.25;
                   BsOverlayLoader.update(progress);
 
                   if (progress >= 1) {
-                    BsOverlayLoader.hide();
+                    Future.delayed(Duration(milliseconds: 300)).then((_) {
+                      BsOverlayLoader.hide();
+                    });
                     progress = 0;
                     _.cancel();
                   }
                 });
-                BsOverlayLoader.show(context, text: 'Uploading');
+                BsOverlayLoader.show(context, text: '업로드...');
               },
             ),
           ],
