@@ -51,10 +51,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   if (progress >= 1) {
                     Future.delayed(Duration(milliseconds: 300)).then((_) {
-                      BsOverlayLoader.hide();
+                      BsOverlayLoader.refresh();
                     });
                     progress = 0;
-                    _.cancel();
                   }
                 });
                 BsOverlayLoader.show(context, text: '업로드...');

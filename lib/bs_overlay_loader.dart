@@ -6,6 +6,7 @@ import 'dart:math';
 
 class BsOverlayLoaderController {
   void Function(double) updatingProgress;
+  void Function() refresh;
 }
 
 class BsOverlayLoader extends StatefulWidget {
@@ -39,6 +40,15 @@ class BsOverlayLoader extends StatefulWidget {
       } finally {
         _currentLoader = null;
       }
+    }
+  }
+
+  static void refresh() {
+    if (_loaderController.refresh != null) {
+      _loaderController.refresh();
+    } else {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _loaderController.refresh);
     }
   }
 
@@ -108,6 +118,7 @@ class _BsOverlayLoaderState extends State<BsOverlayLoader> {
         foregroundColor: Colors.blueGrey[400],
         value: _progress,
         text: widget.text,
+        loaderController: widget._controller,
       ),
     );
   }
@@ -118,12 +129,14 @@ class BsCircleProgressBar extends StatefulWidget {
   final Color foregroundColor;
   final double value;
   final String text;
+  final BsOverlayLoaderController loaderController;
   const BsCircleProgressBar({
     Key key,
     this.backgroundColor,
     @required this.foregroundColor,
     @required this.value,
     @required this.text,
+    @required this.loaderController,
   }) : super(key: key);
 
   @override
@@ -133,12 +146,21 @@ class BsCircleProgressBar extends StatefulWidget {
 class _BsCircleProgressBarState extends State<BsCircleProgressBar>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
-
+  Tween<double> _valueTween;
   Animation<double> _curve;
+
+  void refresh() {
+    this._valueTween = Tween<double>(
+      begin: 0,
+      end: 1,
+    );
+    this._controller.reset();
+  }
+
   @override
   void initState() {
     super.initState();
-
+    widget.loaderController.refresh = refresh;
     this._controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -148,15 +170,15 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
       curve: Curves.bounceInOut,
     );
     this._controller.forward();
-    this.valueTween = Tween<double>(
+    this._valueTween = Tween<double>(
       begin: 0,
       end: this.widget.value,
     );
   }
 
-  Tween<double> valueTween;
   @override
   void dispose() {
+    widget.loaderController.refresh = null;
     this._controller.dispose();
     super.dispose();
   }
@@ -166,8 +188,8 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
     super.didUpdateWidget(oldWidget);
     if (this.widget.value != oldWidget.value) {
       double beginValue =
-          this.valueTween?.evaluate(this._controller) ?? oldWidget?.value ?? 0;
-      this.valueTween = Tween<double>(
+          this._valueTween?.evaluate(this._controller) ?? oldWidget?.value ?? 0;
+      this._valueTween = Tween<double>(
         begin: beginValue,
         end: this.widget.value ?? 1,
       );
@@ -195,7 +217,7 @@ class _BsCircleProgressBarState extends State<BsCircleProgressBar>
               animation: this._controller,
               child: Container(),
               builder: (context, child) {
-                double percentage = this.valueTween.evaluate(_curve);
+                double percentage = this._valueTween.evaluate(_curve);
                 return Stack(
                   children: [
                     Container(
