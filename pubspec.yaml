@@ -1,8 +1,8 @@
 name: bs_overlay_loader
-description: overlay simple progress loader to screen
+description: Overlay simple progress loader to screen.
 version: 0.0.1
-author: bebesoft
-homepage: bebe-soft.com
+author: bebe<leebebe0612@gmail.com>
+homepage: https://github.com/bebe0612/bs_overlay_loader
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
