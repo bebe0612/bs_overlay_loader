@@ -26,8 +26,7 @@ class BsOverlayLoader extends StatefulWidget {
     if (_loaderController.updatingProgress != null) {
       _loaderController.updatingProgress(progress);
     } else {
-      WidgetsBinding.instance.addPostFrameCallback(
-          (_) => _loaderController.updatingProgress(progress));
+      WidgetsBinding.instance.addPostFrameCallback((_) => update(progress));
     }
   }
 
@@ -47,8 +46,7 @@ class BsOverlayLoader extends StatefulWidget {
     if (_loaderController.refresh != null) {
       _loaderController.refresh();
     } else {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _loaderController.refresh);
+      WidgetsBinding.instance.addPostFrameCallback((_) => refresh());
     }
   }
 
